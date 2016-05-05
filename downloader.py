@@ -8,6 +8,8 @@ from datetime import datetime
 
 # Getting the arguments for the subtitle.
 arguments = sys.argv[1:]
+product = arguments[1]
+code = arguments[0]
 
 # opener = urllib2.build_opener()
 # opener.addheaders = [('User-agent', 'Mozilla/5.0'), ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')]
@@ -18,28 +20,31 @@ arguments = sys.argv[1:]
 # url_response = urllib2.urlopen(url).read()
 # print url_response 
 
-results = requests.get("http://www.amazon.in/gp/product/B00QJDOEAO",  
+results = requests.get("http://www.amazon.in/"+product+"/dp/"+code,  
               headers={'User-Agent': 'Mozilla/5.0'})
 
 soup = BeautifulSoup(results.text)
 price = soup.find_all("div", id='price_feature_div')[0]
-price_row = price.find_all("td")
-price_actual = price_row[1].find_all("span")[0].text
+price_row = price.find_all("td", class_="a-span12 a-color-secondary a-size-base a-text-strike")[0].text
+message = product + " Price: " + ' '.join(price_row.split()[0:])
 
-message = "Kindle Price: " + price_actual
-
-dealprice = price.find_all("tr", id='priceblock_dealprice_row')
+dealprice = price.find_all("span", id='priceblock_saleprice')
 if len(dealprice)>0:
-	dealprice = dealprice[0]
-	dprice =  dealprice.find_all("td")[1].find_all("span")[0].text
-	message += "    Deal price: " + dprice;
+	dealprice = dealprice[0].text
+	message += " Sale: " + ' '.join(dealprice.split()[0:])
+
+disocunt = price.find_all("tr", id='regularprice_savings')
+if len(disocunt)>0:
+	disocunt = disocunt[0]
+	dprice =  disocunt.find_all("td", class_="a-span12 a-color-price a-size-base")[0].text
+	message += " Disocunt: " + ' '.join(dprice.split()[1:])
 
 subprocess.Popen(['notify-send', message])
 
 cur_time = ctime()
 message += " at " + cur_time + "\n"
 
-with open("price.txt", "a") as myfile:
+with open("/home/achiever202/Work/Amazon-Utility/price.txt", "a") as myfile:
     myfile.write(message.encode('utf-8'))
 # table_rows = soup.find_all("td")
 # print table_rows

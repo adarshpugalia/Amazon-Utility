@@ -12,7 +12,7 @@ arguments = sys.argv[1:]
 book_id = sys.argv[1]
 book = sys.argv[2]
 
-results = requests.get("http://www.amazon.in/gp/product/" + book_id,  
+results = requests.get("http://www.amazon.in/" + book + "/dp/" + book_id,  
               headers={'User-Agent': 'Mozilla/5.0'})
 
 soup = BeautifulSoup(results.text)
@@ -30,5 +30,5 @@ subprocess.Popen(['notify-send', message])
 cur_time = ctime()
 message += " at " + cur_time + "\n"
 
-with open("price.txt", "a") as myfile:
+with open("/home/achiever202/Work/Amazon-Utility/price.txt", "a") as myfile:
     myfile.write(message.encode('utf-8'))
